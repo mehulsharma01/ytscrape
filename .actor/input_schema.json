@@ -3,12 +3,51 @@
   "type": "object",
   "schemaVersion": 1,
   "properties": {
-    "searchQueries": { "title": "Search queries", "type": "array", "editor": "stringList", "description": "One query per line, typed as in the YouTube search box.", "prefill": ["skincare routine order"] },
-    "maxVideos": { "title": "Videos per query", "type": "integer", "default": 10, "minimum": 0 },
-    "maxShorts": { "title": "Shorts per query", "type": "integer", "default": 10, "minimum": 0 },
-    "fetchChannels": { "title": "Fetch channel subscriber counts", "type": "boolean", "default": true },
-    "language": { "title": "Language (hl)", "type": "string", "editor": "textfield", "default": "en" },
-    "region": { "title": "Region (gl)", "type": "string", "editor": "textfield", "default": "US" }
+    "searchQueries": {
+      "title": "Search queries",
+      "type": "array",
+      "editor": "stringList",
+      "description": "One query per line, typed as in the YouTube search box.",
+      "prefill": [
+        "skincare routine order"
+      ]
+    },
+    "maxVideos": {
+      "title": "Videos per query",
+      "type": "integer",
+      "default": 10,
+      "minimum": 0,
+      "description": "How many regular videos to save per query, in YouTube's order."
+    },
+    "maxShorts": {
+      "title": "Shorts per query",
+      "type": "integer",
+      "default": 10,
+      "minimum": 0,
+      "description": "How many Shorts to save per query, in YouTube's order."
+    },
+    "fetchChannels": {
+      "title": "Fetch channel subscriber counts",
+      "type": "boolean",
+      "default": true,
+      "description": "Look up each result's channel to add subscriber count and country."
+    },
+    "language": {
+      "title": "Language (hl)",
+      "type": "string",
+      "editor": "textfield",
+      "default": "en",
+      "description": "Interface language sent to YouTube, such as en."
+    },
+    "region": {
+      "title": "Region (gl)",
+      "type": "string",
+      "editor": "textfield",
+      "default": "US",
+      "description": "Country to search as, such as US, AE, IN, BR or GB."
+    }
   },
-  "required": ["searchQueries"]
+  "required": [
+    "searchQueries"
+  ]
 }
