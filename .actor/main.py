@@ -24,16 +24,44 @@ from apify import Actor
 
 from ytscrape import SearchFilter, YouTube
 
-SUGGEST_URL = "https://suggestqueries-clients6.youtube.com/complete/search"
+SUGGEST_ENDPOINTS = (
+    ("https://suggestqueries-clients6.youtube.com/complete/search", {"client": "youtube", "ds": "yt"}),
+    ("https://suggestqueries.google.com/complete/search", {"client": "youtube", "ds": "yt"}),
+    ("https://suggestqueries.google.com/complete/search", {"client": "firefox", "ds": "yt"}),
+)
+_debugged = False
+
+
+def _parse_suggest(text: str) -> list[str]:
+    """Handle both JSON (["q", ["a", "b"]]) and JSONP (window.google.ac.h(["q", [["a", 0], ...]]))."""
+    start, end = text.find("["), text.rfind("]")
+    if start < 0 or end <= start:
+        return []
+    data = json.loads(text[start : end + 1])
+    out = []
+    for item in data[1] if len(data) > 1 else []:
+        if isinstance(item, str):
+            out.append(item)
+        elif isinstance(item, list) and item and isinstance(item[0], str):
+            out.append(item[0])
+    return out
 
 
 def suggestions(session: requests.Session, q: str, hl: str, gl: str) -> list[str]:
-    try:
-        r = session.get(SUGGEST_URL, params={"client": "firefox", "ds": "yt", "hl": hl, "gl": gl, "q": q}, timeout=15)
-        data = json.loads(r.text)
-        return [s for s in data[1] if isinstance(s, str)]
-    except Exception:
-        return []
+    global _debugged
+    for url, extra in SUGGEST_ENDPOINTS:
+        try:
+            r = session.get(url, params={**extra, "hl": hl, "gl": gl, "q": q}, timeout=15,
+                            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"})
+            found = _parse_suggest(r.text)
+            if not _debugged:
+                Actor.log.info(f"suggest {url} {extra['client']} -> HTTP {r.status_code}, {len(found)} items, body starts: {r.text[:120]!r}")
+                _debugged = len(found) > 0
+            if found:
+                return found
+        except Exception as e:
+            Actor.log.warning(f"suggest {url} failed: {e}")
+    return []
 
 
 def discover(seeds: list[str], modifiers: list[str], alphabet: bool, hl: str, gl: str) -> dict[str, int]:
