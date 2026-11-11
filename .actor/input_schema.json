@@ -1,0 +1,14 @@
+{
+  "title": "YouTube search research",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "searchQueries": { "title": "Search queries", "type": "array", "editor": "stringList", "description": "One query per line, typed as in the YouTube search box.", "prefill": ["skincare routine order"] },
+    "maxVideos": { "title": "Videos per query", "type": "integer", "default": 10, "minimum": 0 },
+    "maxShorts": { "title": "Shorts per query", "type": "integer", "default": 10, "minimum": 0 },
+    "fetchChannels": { "title": "Fetch channel subscriber counts", "type": "boolean", "default": true },
+    "language": { "title": "Language (hl)", "type": "string", "editor": "textfield", "default": "en" },
+    "region": { "title": "Region (gl)", "type": "string", "editor": "textfield", "default": "US" }
+  },
+  "required": ["searchQueries"]
+}

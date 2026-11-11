@@ -1,0 +1,8 @@
+{
+  "actorSpecification": 1,
+  "name": "ytscrape",
+  "title": "ytscrape: YouTube search research",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "./Dockerfile"
+}
