@@ -64,11 +64,12 @@ def suggestions(session: requests.Session, q: str, hl: str, gl: str) -> list[str
     return []
 
 
-def discover(seeds: list[str], modifiers: list[str], alphabet: bool, hl: str, gl: str) -> dict[str, int]:
-    """Return {phrase: best suggestion rank} from YouTube autocomplete."""
+def discover(seeds: list[str], modifiers: list[str], alphabet: bool, hl: str, gl: str, limit: int) -> dict[str, int]:
+    """Return {phrase: best suggestion rank}, taking phrases from every seed in turn."""
     session = requests.Session()
-    found: dict[str, int] = {}
+    per_seed: list[dict[str, int]] = []
     for seed in seeds:
+        found: dict[str, int] = {}
         prompts = [seed] + [f"{seed} {m}" for m in modifiers] + [f"{m} {seed}" for m in ("which", "is", "can you")]
         if alphabet:
             prompts += [f"{seed} {c}" for c in string.ascii_lowercase]
@@ -78,7 +79,20 @@ def discover(seeds: list[str], modifiers: list[str], alphabet: bool, hl: str, gl
                 if s and (s not in found or rank < found[s]):
                     found[s] = rank
             time.sleep(0.15)
-    return found
+        per_seed.append(dict(sorted(found.items(), key=lambda kv: kv[1])))
+    # Round-robin across seeds so early seeds don't fill the cap.
+    picked: dict[str, int] = {}
+    iters = [iter(d.items()) for d in per_seed]
+    while iters and len(picked) < limit:
+        for it in list(iters):
+            try:
+                k, r = next(it)
+                picked.setdefault(k, r)
+            except StopIteration:
+                iters.remove(it)
+            if len(picked) >= limit:
+                break
+    return picked
 
 
 def days_old(v) -> float | None:
@@ -141,11 +155,11 @@ async def main() -> None:
         for gl in regions:
             phrases: dict[str, int] = {q.strip().lower(): 0 for q in inp.get("searchQueries") or [] if q.strip()}
             if inp.get("seeds"):
-                found = discover(inp["seeds"], inp.get("modifiers") or ["vs", "for", "explained", "mistakes", "routine", "types"], inp.get("alphabet", False), hl, gl)
+                found = discover(inp["seeds"], inp.get("modifiers") or ["vs", "for", "explained", "mistakes", "routine", "types"], inp.get("alphabet", False), hl, gl, max_topics)
                 Actor.log.info(f"[{gl}] autocomplete found {len(found)} phrases")
                 for k, r in found.items():
                     phrases.setdefault(k, r)
-            items = sorted(phrases.items(), key=lambda kv: kv[1])[:max_topics]
+            items = list(phrases.items())[:max_topics]
 
             with YouTube(language=hl, region=gl, min_interval=0.4) as yt:
                 for q, rank in items:
