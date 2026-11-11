@@ -7,7 +7,7 @@
       "title": "Search queries",
       "type": "array",
       "editor": "stringList",
-      "description": "One query per line, typed as in the YouTube search box.",
+      "description": "Phrases to score as given, one per line.",
       "prefill": [
         "skincare routine order"
       ]
@@ -19,18 +19,11 @@
       "minimum": 0,
       "description": "How many regular videos to save per query, in YouTube's order."
     },
-    "maxShorts": {
-      "title": "Shorts per query",
-      "type": "integer",
-      "default": 10,
-      "minimum": 0,
-      "description": "How many Shorts to save per query, in YouTube's order."
-    },
     "fetchChannels": {
       "title": "Fetch channel subscriber counts",
       "type": "boolean",
       "default": true,
-      "description": "Look up each result's channel to add subscriber count and country."
+      "description": "Look up subscriber counts for each topic's top 5 channels."
     },
     "language": {
       "title": "Language (hl)",
@@ -45,9 +38,76 @@
       "editor": "textfield",
       "default": "US",
       "description": "Country to search as, such as US, AE, IN, BR or GB."
+    },
+    "seeds": {
+      "title": "Seed words",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Expanded through YouTube search suggestions into the phrases people type now, e.g. nails, blush, hair porosity.",
+      "prefill": [
+        "blush",
+        "nail polish"
+      ]
+    },
+    "modifiers": {
+      "title": "Suggestion modifiers",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Words added after each seed before asking for suggestions.",
+      "default": [
+        "vs",
+        "for",
+        "explained",
+        "mistakes",
+        "routine",
+        "types"
+      ]
+    },
+    "alphabet": {
+      "title": "Expand seed + a-z",
+      "type": "boolean",
+      "description": "Also ask for suggestions for each seed followed by every letter (26 more requests per seed).",
+      "default": false
+    },
+    "regions": {
+      "title": "Regions",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Countries to search as, e.g. US, AE, IN, BR, GB. Each region is a full pass.",
+      "default": [
+        "US"
+      ]
+    },
+    "maxTopics": {
+      "title": "Max phrases per region",
+      "type": "integer",
+      "description": "Cap on phrases scored per region, best autocomplete rank first.",
+      "default": 150
+    },
+    "recentDays": {
+      "title": "Recent window (days)",
+      "type": "integer",
+      "description": "Videos newer than this count toward current demand.",
+      "default": 120
+    },
+    "smallChannelSubs": {
+      "title": "Small channel (subscribers)",
+      "type": "integer",
+      "description": "Channels under this count as small.",
+      "default": 50000
+    },
+    "oldDays": {
+      "title": "Old video (days)",
+      "type": "integer",
+      "description": "Top results older than this count as old.",
+      "default": 730
+    },
+    "saveVideos": {
+      "title": "Save video rows",
+      "type": "boolean",
+      "description": "Also save the videos behind each topic.",
+      "default": true
     }
   },
-  "required": [
-    "searchQueries"
-  ]
+  "required": []
 }
